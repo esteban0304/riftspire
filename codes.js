@@ -1,0 +1,1 @@
+(()=>{const w=['nova','rift','echo','bolt','juno','ember','frost','comet','pixel','spire'];const pick=()=>w[Math.random()*w.length|0]+'-'+(1000+Math.random()*9000|0);const c=document.getElementById('code'),b=document.getElementById('bcode');if(c&&!c.value)c.value=pick();if(b&&!b.value)b.value=pick();})();

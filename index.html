@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Riftspire">
+<title>Riftspire</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800&family=Space+Grotesk:wght@400;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/CopyShader.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/LuminosityHighPassShader.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/EffectComposer.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/RenderPass.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/ShaderPass.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/UnrealBloomPass.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/environments/RoomEnvironment.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/utils/SkeletonUtils.js"></script>
+<script src="js/boot.js"></script>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="wrap">
+  <canvas id="c" tabindex="0"></canvas>
+  <div id="hud" class="hidden">
+    <div id="vig"></div><div id="scope"></div>
+    <div id="dmgs"></div><div id="tut" class="hidden"><div id="tutHead"><img id="tutImg" alt=""><div><div id="tutNum"></div><div id="tutT"></div></div></div><div id="tutD"></div><div id="tutKeys"></div><div id="tutBar"><div id="tutFill"></div></div><div id="tutSkip">Press K to skip training</div></div><div id="ride" class="hidden"><div class="rideArrow">▲</div><div id="rideNum"></div><div id="rideName"></div></div><div id="dlg" class="hidden"><img id="dlgImg" alt=""><div class="dlgBody"><div id="dlgWho"></div><div id="dlgText"></div><div id="dlgChoices"></div><div id="dlgHint"></div></div></div><div id="board" class="hidden"><h3 id="boardT">Scoreboard</h3><div class="brow" style="background:none;color:var(--dim);font-size:11px"><span>PLAYER</span><b>ELIMS</b><span>DEATHS</span></div><div id="boardList"></div><p id="boardSub"></p></div><div id="ddBox"></div><div id="combo"></div><div id="note"></div><div id="fps"></div>
+    <div id="cross"><i class="a"></i><i class="b"></i><i class="c"></i><i class="d"></i></div>
+    <div id="hit"><i class="a"></i><i class="b"></i><i class="c"></i><i class="d"></i></div>
+    <div id="tl"><div id="clock" class="serif">11:52 PM</div><div id="floorName"></div><div id="obj"></div><div id="scoreLine"></div></div>
+    <div id="bossbar"><div id="bossName" class="serif"></div><div class="bar"><i id="bossFill"></i></div></div>
+    <div id="tr"><canvas id="map" width="170" height="170"></canvas><div id="left"></div><div id="feed"></div><div id="crew"></div></div>
+    <div id="banner"><h1 id="bannerT" class="serif"></h1><p id="bannerS"></p></div>
+    <div id="bc">
+      <div id="prompt" class="hidden"></div>
+      <div id="abil"></div>
+      <div class="vital"><span class="n mono" id="shN">0</span><div class="bar"><i id="shFill"></i></div></div>
+      <div class="vital"><span class="n mono" id="hpN">100</span><div class="bar"><i id="hpFill"></i></div></div>
+    </div>
+    <div id="bl">
+      <div id="radio"><img id="finchImg" alt=""><div><div class="who" id="radioWho">CALLIOPE</div><div class="txt" id="radioTxt"></div></div></div>
+      <div id="build"><span class="bk" id="bkF">F · Wall</span><span class="bk" id="bkC">C · Ramp</span><span class="bk" id="bkV">V · Floor</span><span class="bk">Cells <span id="mats" class="mono">0</span></span></div>
+    </div>
+    <div id="br"><div id="atkChip" class="hidden"></div><div id="wName"></div><div id="ammo" class="mono"></div><div id="slots"></div></div>
+  </div>
+
+<div id="con" class="hidden"><div id="conHead"><span>ADMIN CONSOLE</span><button id="conClose">&#10005;</button></div><div id="conLog"></div><input id="conIn" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="type a command, e.g. help"></div><div id="cheatTag" class="hidden"></div><div id="actCard" class="hidden"><div id="actN"></div><div id="actT"></div></div><div id="pctBig"></div><div id="raceCount" class="hidden"></div><div id="pTags"></div><div id="fpsBox" class="hidden"></div>
+<div id="rotate"><div class="ph"></div><div>Turn your phone sideways to play</div><div style="font-size:13px;color:#9a93b8;font-weight:500">Tip: on iPhone, tap Share → Add to Home Screen to play full screen.</div></div>
+
+<div id="touch">
+  <div id="tHintL"></div>
+  <div id="tStick"><div id="tKnob"></div></div>
+  <div id="tTop"><div class="tb" data-b="pause">&#8801;</div><div class="tb" data-b="hint">?</div><div class="tb" id="tCon" data-b="con" style="font-size:13px">&gt;_</div></div>
+  <div id="tRow"><div class="tb" id="tBuild" data-b="build">BUILD</div><div class="tb" id="tNade" data-b="nade">GRENADE</div></div>
+  <div class="tb" id="tUse" data-b="use">USE</div>
+  <div class="tb" id="tJump" data-b="jump">JUMP</div>
+  <div class="tb" id="tReload" data-b="reload">RELOAD</div>
+  <div class="tb" id="tCrouch" data-b="crouch">SLIDE</div>
+  <div class="tb" id="tDash" data-b="dash">DASH</div>
+  <div class="tb" id="tAim" data-b="aim">FREEZE</div>
+  <div class="tb" id="tFire" data-b="fire">FIRE</div>
+</div>
+
+  <div id="title" class="menuRoot">
+    <div class="mLeft">
+      <div class="logo"><span class="l1">RIFT</span><span class="l2">SPIRE</span></div>
+      <div class="tag">Magic and machines. One impossible tower.</div>
+      <nav id="mNav">
+        <button class="mi on" data-p="play"><i></i>Play</button>
+        <button class="mi" data-p="coop"><i></i>Co-op</button>
+        <button class="mi" data-p="battle"><i></i>Battle</button>
+        <button class="mi" data-p="journal"><i></i>Journal</button>
+        <button class="mi" data-p="ach"><i></i>Achievements</button>
+        <button class="mi" data-p="settings"><i></i>Settings</button>
+        <button class="mi" data-p="credits"><i></i>Credits</button>
+      </nav>
+      <div class="mFoot">v1.0 · keyboard and mouse, or gamepad</div>
+    </div>
+    <div class="mRight">
+      <section class="mp" id="p-play">
+        <div class="mpHead">Rift-runner profile</div>
+        <div class="row" style="margin-top:6px">
+          <div class="field"><label>Name</label><input type="text" id="name" maxlength="14" placeholder="Nova"></div>
+        </div>
+        <div class="row"><div class="field"><label>Suit colour</label><div id="swatches" class="swatches"></div></div></div>
+        <div class="mpHead" style="margin-top:16px">Difficulty</div>
+        <div class="seg" id="diffSeg"><button data-d="easy">Easy</button><button data-d="normal">Normal</button><button data-d="nightmare">Nightmare</button></div>
+        <select id="diff" class="hidden"><option value="easy">Easy</option><option value="normal">Normal</option><option value="nightmare">Nightmare</option></select>
+        <div class="mpHead" style="margin-top:16px">Start level</div>
+        <div id="levels" class="levels"></div>
+        <select id="startCh" class="hidden"></select>
+        <button id="contBtn" class="primary big hidden">Continue</button>
+        <button id="solo" class="primary big">Begin the climb</button>
+        <button id="tutBtn" class="big">Training</button>
+        <div id="progress" class="progress"></div><div id="buildTag" style="font-size:11px;opacity:.55;margin-top:4px"></div>
+      </section>
+      <section class="mp hidden" id="p-coop">
+        <div class="mpHead">Co-op crew</div>
+        <p class="mpText">Climb together. Everyone opens this same page and enters the same crew code. Enemies get tougher with each extra player, and downed players get back up after 10 seconds.</p>
+        <div class="field"><label>Crew code</label><input type="text" id="code" maxlength="20" value=""></div>
+        <button id="join" class="primary big" disabled>Connecting…</button>
+        <div id="joinnote" class="note">The first player in a crew picks the difficulty and start level from the Play tab.</div>
+      </section>
+      <section class="mp hidden" id="p-battle">
+        <div class="mpHead">Battle mode</div>
+        <p class="mpText">Smash-style free-for-all on a floating stage. Nobody loses health: every hit raises your damage %, and the higher it gets, the further hits launch you. Knock your friends off the edge to score a K.O. Everyone opens this page and enters the same arena code.</p>
+        <div class="field"><label>Arena code</label><input type="text" id="bcode" maxlength="20" value=""></div>
+        <div class="mpHead" style="margin-top:14px">Mode</div>
+        <div class="seg" id="modeSeg"><button data-v="smash" class="on">Smash battle</button><button data-v="race">Parkour race</button></div>
+        <div class="mpHead limH" style="margin-top:14px">K.O.s to win</div>
+        <div class="seg" id="limSeg"><button data-v="5">5</button><button data-v="10" class="on">10</button><button data-v="15">15</button></div>
+        
+        <button id="bJoin" class="primary big" disabled>Connecting…</button>
+        <button id="bSolo" class="big">Practice vs training bots</button>
+        <div class="note">The first player in an arena sets the rules. Hold Tab for the scoreboard.</div>
+      </section>
+      <section class="mp hidden" id="p-credits">
+        <div class="mpHead">Credits</div>
+        <p class="mpText"><b>A game by Esteban.</b></p><p class="mpText">Testing: Alexander, a.k.a. <b>Nova</b>.</p><p class="mpText">Built with Claude. People, monsters, trees and houses are from Quaternius's free CC0 packs (Ultimate Modular Men &amp; Women, Ultimate Monsters, Stylized Nature MegaKit, Medieval Village MegaKit). Every sound and note of music is generated live in your browser.</p>
+        <p class="mpText">Story: a research station, a wizard's tower, an AI that wanted a body, and a sister worth climbing for.</p>
+        <div class="keys">
+          <b>WASD</b><span>move (ZQSD on AZERTY) · <b>Shift</b> sprint · <b>Space</b> jump</span>
+          <b>Mouse</b><span>aim · <b>Left</b> shoot · <b>Right</b> or hold <b>Z</b> / <b>Option</b>: aim + stasis beam (and blade guard)</span>
+          <b>X / Q</b><span>crouch, slide · rift blink (A on AZERTY)</span>
+          <b>F C V</b><span>barrier wall, ramp, floor · <b>E</b> talk, interact · <b>H</b> hint</span>
+          <b>1–5 · R · G · T</b><span>weapons · reload · grenade · inspect</span>
+        </div>
+      </section>
+    </div>
+  </div>
+  <div id="settings" class="overlay hidden">
+    <div class="card">
+      <h2>Settings</h2>
+      <div class="set">
+        <span>Mouse sensitivity</span><input type="range" id="sSens" min="1" max="25" step="1"><span class="v" id="vSens"></span>
+        <span>Aim sensitivity</span><input type="range" id="sAim" min="20" max="100" step="5"><span class="v" id="vAim"></span>
+        <span>Field of view</span><input type="range" id="sFov" min="65" max="105" step="1"><span class="v" id="vFov"></span>
+        <span>Volume</span><input type="range" id="sVol" min="0" max="100" step="5"><span class="v" id="vVol"></span>
+        <span>Music</span><input type="range" id="sMus" min="0" max="100" step="5"><span class="v" id="vMus"></span>
+        <span>Brightness</span><input type="range" id="sBri" min="60" max="160" step="5"><span class="v" id="vBri"></span>
+        <span>Invert mouse Y</span><label><input type="checkbox" id="sInv"> invert</label><span></span>
+        <span>Graphics</span><select id="sQ"><option value="high">High (glow + shadows)</option><option value="medium">Medium (glow)</option><option value="low">Low (fastest)</option></select><span></span>
+        <span>Head bob</span><label><input type="checkbox" id="sBob"> on</label><span></span>
+        <span>Screen shake</span><label><input type="checkbox" id="sShake"> on</label><span></span>
+        <span>Show FPS</span><label><input type="checkbox" id="sFps"> on</label><span></span>
+        <span>Crosshair colour</span><select id="sXh"><option value="#ffffff">White</option><option value="#5ee08a">Green</option><option value="#ffd23f">Yellow</option><option value="#4cc9f0">Cyan</option><option value="#ff4d6d">Red</option></select><span></span>
+      </div>
+      <div class="row"><button id="setBack" class="primary">Done</button></div>
+    </div>
+  </div>
+
+  <div id="lockChip" class="off">Click to capture the mouse</div>
+  <div id="pause" class="overlay hidden">
+    <div class="card" style="text-align:center;max-width:420px">
+      <h2>Paused</h2><p id="pauseHint">Click Resume to capture the mouse again.</p>
+      <div class="row" style="justify-content:center"><button id="resume" class="primary">Resume</button><button id="pSet">Settings</button><button id="pJ">Journal</button><button id="quit">Quit to title</button></div>
+    </div>
+  </div>
+
+  <div id="upgrade" class="overlay hidden">
+    <div class="card" style="max-width:780px">
+      <h2 id="upTitle">Floor cleared</h2>
+      <div id="results"></div>
+      <p>Choose one upgrade, then ride the elevator up.</p>
+      <div class="ups" id="ups"></div>
+    </div>
+  </div>
+
+  <div id="cine" class="hidden"><button id="cineSkip">Skip</button><div id="cineText"></div><div id="cineHint">Click or press Space to continue</div></div>
+
+  <div id="journal" class="overlay hidden"><div class="card" style="max-width:680px"><h2>Journal</h2><p>Everything you've recovered in the Riftspire, across all your runs.</p><div id="jList" class="list"></div><div class="row"><button id="jBack" class="primary">Close</button></div></div></div>
+  <div id="achv" class="overlay hidden"><div class="card" style="max-width:720px"><h2>Achievements</h2><p id="aCount"></p><div id="aList" class="list aGrid"></div><p id="aStats" style="font-size:12px"></p><p id="aBest" style="font-size:12px"></p><div class="row"><button id="aBack" class="primary">Close</button></div></div></div>
+  <div id="loading" class="hidden"><h2 id="loadT">RIFTSPIRE</h2><div class="sp"></div><p id="tip"></p></div>
+  <div id="achToast"><small>Achievement unlocked</small><b id="achName"></b><span id="achDesc"></span></div>
+
+  <div id="endCard" class="overlay hidden">
+    <div class="card" style="text-align:center">
+      <h2 id="endT"></h2><p id="endP"></p><div id="endRes"></div><p style="font-size:12px;opacity:.75;margin:10px 0 0">A game by <b>Esteban</b> · Testing by Alexander "<b>Nova</b>"</p>
+      <div class="row" style="justify-content:center"><button id="keepGo" class="primary hidden">Keep going</button><button id="again" class="primary">Play again</button><button id="leave2">Quit to title</button></div>
+    </div>
+  </div>
+</div>
+
+<script src="js/game.js"></script>
+<script src="js/trystero.js"></script>
+<script src="js/p2p.js"></script>
+<script src="js/codes.js"></script></body>
+</html>
